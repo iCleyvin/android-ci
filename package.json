@@ -1,0 +1,19 @@
+{
+  "name": "tetris-infinite",
+  "version": "1.0.0",
+  "description": "TETRIS∞ - Infinite World Android Game",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Static app - no build needed'",
+    "cap:init": "npx cap init 'TETRIS∞' 'com.tetrisinfinite.game' --web-dir www",
+    "cap:android": "npx cap add android",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "setup": "npm install && npx cap init 'TETRIS Infinite' 'com.tetrisinfinite.game' --web-dir www && npx cap add android && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  }
+}
