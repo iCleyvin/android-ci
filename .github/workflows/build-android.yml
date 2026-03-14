@@ -24,7 +24,7 @@ jobs:
           echo "/home/cleyvinserv/android-sdk/build-tools/34.0.0" >> $GITHUB_PATH
 
       - name: Install Node dependencies
-        run: npm ci
+        run: npm install
 
       - name: Add Android platform (si no existe)
         run: |
