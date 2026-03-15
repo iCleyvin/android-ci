@@ -25,7 +25,7 @@
       overflow: hidden;
       font-family: 'Share Tech Mono', monospace;
       color: var(--neon-cyan);
-      touch-action: none;
+      touch-action: manipulation;
     }
 
     /* Animated scanlines */
@@ -126,6 +126,8 @@
       border: none; outline: none;
       padding: 16px 48px;
       cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
       clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
       box-shadow: 0 0 30px rgba(0,255,247,0.8), inset 0 0 20px rgba(255,255,255,0.2);
       transition: all 0.15s;
