@@ -444,7 +444,7 @@
       RÉCORD PERSONAL
       <span id="start-record">0</span>
     </div>
-    <button class="btn-start" id="btn-start">JUGAR</button>
+    <button class="btn-start" id="btn-start" onclick="startGame()">JUGAR</button>
     <div class="hint-text">DESLIZA · TOCA · DESTRUYE</div>
   </div>
 
@@ -796,6 +796,12 @@ function tryRotate() {
 
 // ── Game start / end ──
 function startGame() {
+  if (!canvas) {
+    canvas = document.getElementById('board-canvas');
+    ctx = canvas.getContext('2d');
+    nextCanvas = document.getElementById('next-canvas');
+    nextCtx = nextCanvas.getContext('2d');
+  }
   record = loadRecord();
   board = emptyBoard();
   score = 0; lines = 0; level = 1;
@@ -896,12 +902,20 @@ document.addEventListener('keydown', e => {
   if (e.key === 'p' || e.key === 'P') togglePause();
 });
 
-// ── Init ──
+// ── Init canvas immediately (script is at end of body, DOM exists) ──
+canvas     = document.getElementById('board-canvas');
+ctx        = canvas.getContext('2d');
+nextCanvas = document.getElementById('next-canvas');
+nextCtx    = nextCanvas.getContext('2d');
+
 window.addEventListener('DOMContentLoaded', () => {
-  canvas     = document.getElementById('board-canvas');
-  ctx        = canvas.getContext('2d');
-  nextCanvas = document.getElementById('next-canvas');
-  nextCtx    = nextCanvas.getContext('2d');
+  // Re-init in case script ran before DOM (shouldn't happen but just in case)
+  if (!canvas) {
+    canvas     = document.getElementById('board-canvas');
+    ctx        = canvas.getContext('2d');
+    nextCanvas = document.getElementById('next-canvas');
+    nextCtx    = nextCanvas.getContext('2d');
+  }
 
   // Show record on start screen
   document.getElementById('start-record').textContent = loadRecord();
