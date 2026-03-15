@@ -887,14 +887,8 @@ canvas.addEventListener('touchend', e => {
 // ── Button controls ──
 function btnPress(id, fn) {
   const el = document.getElementById(id);
-  let interval = null;
-  const start = () => { fn(); interval = setInterval(fn, 100); };
-  const end = () => { clearInterval(interval); };
-  el.addEventListener('touchstart', e => { e.preventDefault(); start(); }, { passive: false });
-  el.addEventListener('touchend',   e => { e.preventDefault(); end(); },   { passive: false });
-  el.addEventListener('mousedown',  start);
-  el.addEventListener('mouseup',    end);
-  el.addEventListener('mouseleave', end);
+  el.addEventListener('touchend', e => { e.preventDefault(); fn(); }, { passive: false });
+  el.addEventListener('click', fn);
 }
 
 // ── Keyboard ──
