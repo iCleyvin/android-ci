@@ -927,8 +927,8 @@ window.addEventListener('DOMContentLoaded', () => {
   btnPress('btn-down',   moveDown);
   document.getElementById('btn-rotate').addEventListener('touchend', e => { e.preventDefault(); tryRotate(); }, { passive: false });
   document.getElementById('btn-rotate').addEventListener('click', tryRotate);
-  document.getElementById('btn-drop').addEventListener('touchend', e => { e.preventDefault(); hardDrop(); }, { passive: false });
-  document.getElementById('btn-drop').addEventListener('click', hardDrop);
+  document.getElementById('btn-drop').addEventListener('touchend', e => { e.preventDefault(); moveDown(); }, { passive: false });
+  document.getElementById('btn-drop').addEventListener('click', moveDown);
 
   window.addEventListener('resize', () => { if (!gameOver) resize(); drawBoard(); });
 
