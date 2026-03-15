@@ -417,6 +417,20 @@
       clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
     }
 
+    /* Hold button */
+    .btn-ctrl.hold {
+      background: rgba(57,255,20,0.08);
+      border-color: rgba(57,255,20,0.4);
+      color: var(--neon-green);
+    }
+    .btn-ctrl.hold:active {
+      background: rgba(57,255,20,0.25);
+      box-shadow: 0 0 15px rgba(57,255,20,0.5);
+    }
+    .btn-ctrl.hold.disabled {
+      opacity: 0.3;
+    }
+
     /* Line clear flash */
     #flash-overlay {
       position: fixed; inset: 0; z-index: 200;
@@ -465,6 +479,10 @@
       <canvas id="board-canvas"></canvas>
       <div class="side-panel">
         <div class="panel-box">
+          <div class="panel-box-label">Hold</div>
+          <canvas id="hold-canvas" width="80" height="80"></canvas>
+        </div>
+        <div class="panel-box">
           <div class="panel-box-label">Siguiente</div>
           <canvas id="next-canvas" width="80" height="80"></canvas>
         </div>
@@ -482,6 +500,7 @@
     </div>
 
     <div class="touch-controls">
+      <button class="btn-ctrl hold" id="btn-hold">Hold</button>
       <button class="btn-ctrl" id="btn-left">◀</button>
       <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
         <button class="btn-ctrl rotate" id="btn-rotate">↺</button>
@@ -544,8 +563,13 @@ const LINES_PER_LEVEL = 10;
 const LEVEL_SPEEDS = [800, 700, 600, 500, 400, 320, 250, 190, 140, 100, 70, 50];
 
 // State
-let board, current, next, score, record, lines, level, gameLoop, paused, gameOver;
+let board, current, next, hold, canHold, score, record, lines, level, gameLoop, paused, gameOver;
 let dropTimer, dropInterval;
+let holdCanvas, holdCtx;
+
+function vibrate(pattern) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
 
 // ── Utils ──
 const clone = arr => arr.map(r => [...r]);
@@ -746,6 +770,7 @@ function lock() {
   }
   current = next;
   next = randomPiece();
+  canHold = true;
   drawNext();
   // Check game over: top rows occupied
   if (board[0].some(c => c) || board[1].some(c => c)) {
@@ -754,11 +779,42 @@ function lock() {
   }
 }
 
+function drawHold() {
+  if (!holdCtx) return;
+  holdCtx.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
+  if (!hold) return;
+  const sz = 16;
+  const offX = Math.floor((holdCanvas.width / sz - 4) / 2);
+  const offY = Math.floor((holdCanvas.height / sz - 2) / 2);
+  for (const [c, r] of hold.cells) {
+    drawCell(holdCtx, (c + offX) * sz, (r + offY) * sz, hold.color, hold.shadow);
+  }
+}
+
+function doHold() {
+  if (!canHold || gameOver || paused) return;
+  canHold = false;
+  if (!hold) {
+    hold = { cells: current.def.cells.map(([c,r]) => [c,r]), color: current.color, shadow: current.shadow, def: current.def };
+    current = next;
+    next = randomPiece();
+    drawNext();
+  } else {
+    const prev = hold;
+    hold = { cells: current.def.cells.map(([c,r]) => [c,r]), color: current.color, shadow: current.shadow, def: current.def };
+    current = spawnPiece(prev.def);
+  }
+  drawHold();
+  drawBoard();
+  vibrate(30);
+}
+
 function flashScreen(cleared) {
   const el = document.getElementById('flash-overlay');
   el.className = cleared === 4 ? 'tetris' : '';
   void el.offsetWidth;
   el.classList.add('flash');
+  vibrate(cleared === 4 ? [50, 30, 80] : [30]);
 }
 
 function hardDrop() {
@@ -805,7 +861,9 @@ function startGame() {
   record = loadRecord();
   board = emptyBoard();
   score = 0; lines = 0; level = 1;
+  hold = null; canHold = true;
   paused = false; gameOver = false;
+  drawHold();
   current = randomPiece();
   next = randomPiece();
   resize();
@@ -822,6 +880,7 @@ function startGame() {
 function endGame() {
   gameOver = true;
   clearInterval(dropTimer);
+  vibrate([80, 50, 80, 50, 200]);
   const isNew = score > loadRecord();
   if (isNew) saveRecord(score);
   const finalRecord = isNew ? score : loadRecord();
@@ -850,6 +909,8 @@ canvas     = document.getElementById('board-canvas');
 ctx        = canvas.getContext('2d');
 nextCanvas = document.getElementById('next-canvas');
 nextCtx    = nextCanvas.getContext('2d');
+holdCanvas = document.getElementById('hold-canvas');
+holdCtx    = holdCanvas.getContext('2d');
 
 let touchStartX, touchStartY, touchStartTime;
 const SWIPE_THRESH = 30;
@@ -922,6 +983,7 @@ window.addEventListener('DOMContentLoaded', () => {
   onTap('btn-pause', togglePause);
   onTap('btn-resume', togglePause);
 
+  btnPress('btn-hold',   doHold);
   btnPress('btn-left',   moveLeft);
   btnPress('btn-right',  moveRight);
   btnPress('btn-down',   moveDown);
