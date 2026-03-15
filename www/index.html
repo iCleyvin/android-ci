@@ -747,8 +747,8 @@ function lock() {
   current = next;
   next = randomPiece();
   drawNext();
-  // Check game over
-  if (!isValid(current.cells, current.ox, current.oy)) {
+  // Check game over: top rows occupied
+  if (board[0].some(c => c) || board[1].some(c => c)) {
     endGame();
     return;
   }
@@ -845,6 +845,12 @@ function show(screen) {
 }
 
 // ── Swipe gesture detection ──
+// ── Init canvas (script is inline at end of body, DOM is ready) ──
+canvas     = document.getElementById('board-canvas');
+ctx        = canvas.getContext('2d');
+nextCanvas = document.getElementById('next-canvas');
+nextCtx    = nextCanvas.getContext('2d');
+
 let touchStartX, touchStartY, touchStartTime;
 const SWIPE_THRESH = 30;
 const TAP_TIME = 200;
@@ -902,20 +908,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'p' || e.key === 'P') togglePause();
 });
 
-// ── Init canvas immediately (script is at end of body, DOM exists) ──
-canvas     = document.getElementById('board-canvas');
-ctx        = canvas.getContext('2d');
-nextCanvas = document.getElementById('next-canvas');
-nextCtx    = nextCanvas.getContext('2d');
-
 window.addEventListener('DOMContentLoaded', () => {
-  // Re-init in case script ran before DOM (shouldn't happen but just in case)
-  if (!canvas) {
-    canvas     = document.getElementById('board-canvas');
-    ctx        = canvas.getContext('2d');
-    nextCanvas = document.getElementById('next-canvas');
-    nextCtx    = nextCanvas.getContext('2d');
-  }
 
   // Show record on start screen
   document.getElementById('start-record').textContent = loadRecord();
