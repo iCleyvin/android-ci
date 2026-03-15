@@ -905,14 +905,19 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('start-record').textContent = loadRecord();
 
   // Buttons
-  document.getElementById('btn-start').addEventListener('click', startGame);
-  document.getElementById('btn-play-again').addEventListener('click', startGame);
-  document.getElementById('btn-menu').addEventListener('click', () => {
+  function onTap(id, fn) {
+    const el = document.getElementById(id);
+    el.addEventListener('click', fn);
+    el.addEventListener('touchend', e => { e.preventDefault(); fn(); }, { passive: false });
+  }
+  onTap('btn-start', startGame);
+  onTap('btn-play-again', startGame);
+  onTap('btn-menu', () => {
     document.getElementById('start-record').textContent = loadRecord();
     show('start');
   });
-  document.getElementById('btn-pause').addEventListener('click', togglePause);
-  document.getElementById('btn-resume').addEventListener('click', togglePause);
+  onTap('btn-pause', togglePause);
+  onTap('btn-resume', togglePause);
 
   btnPress('btn-left',   moveLeft);
   btnPress('btn-right',  moveRight);
