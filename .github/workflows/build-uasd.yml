@@ -1,0 +1,40 @@
+name: Build uasd-despacho Images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check Docker
+        run: docker --version
+
+      - name: Login to ghcr.io
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Checkout uasd-despacho
+        uses: actions/checkout@v4
+        with:
+          repository: iCleyvin/uasd-despacho
+          token: ${{ secrets.UASD_TOKEN }}
+
+      - name: Build and push API image
+        run: |
+          docker build -t ghcr.io/icleyvin/uasd-despacho-api:latest ./backend
+          docker push ghcr.io/icleyvin/uasd-despacho-api:latest
+
+      - name: Build and push Frontend image
+        run: |
+          docker build -t ghcr.io/icleyvin/uasd-despacho-frontend:latest .
+          docker push ghcr.io/icleyvin/uasd-despacho-frontend:latest
+
+      - name: Trigger Coolify redeploy
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          curl -s -X POST             -H "Authorization: Bearer ${COOLIFY_TOKEN}"             -H "Content-Type: application/json"             "http://10.0.0.90:8000/api/v1/deploy"             -d "{\"uuid\": \"jd1gqyzo5d6mdbu9z4oflc6o\", \"force\": true}"
